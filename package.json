@@ -1,11 +1,24 @@
 {
-    "name": "laracap",
+    "name": "laracap-cli",
     "version": "1.0.0",
     "description": "CLI tool for LaraCap deployment",
     "type": "module",
     "bin": {
         "laracap": "./bin/laracap.js"
     },
+    "files": [
+        "bin/",
+        "commands/",
+        "config/"
+    ],
+    "keywords": [
+        "cli",
+        "laravel",
+        "deployment",
+        "laracap"
+    ],
+    "author": "Noval B.",
+    "license": "MIT",
     "dependencies": {
         "archiver": "^6.0.1",
         "axios": "^1.6.2",
@@ -18,8 +31,5 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC"
+    }
 }
