@@ -1,0 +1,23 @@
+{
+    "name": "laracap",
+    "version": "1.0.0",
+    "description": "CLI tool for LaraCap deployment",
+    "bin": {
+        "laracap": "bin/laracap.js"
+    },
+    "dependencies": {
+        "commander": "^11.1.0",
+        "inquirer": "^9.2.12",
+        "axios": "^1.6.2",
+        "archiver": "^6.0.1",
+        "ora": "^7.0.1",
+        "conf": "^12.0.0"
+    },
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}
