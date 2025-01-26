@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from "commander";
-import { login } from "../commands/auth.js";
+import { login, logout } from "../commands/auth.js";
 import { createBundle } from "../commands/bundles.js";
 import { setServerUrl } from "../commands/config.js";
 
@@ -19,5 +19,7 @@ program
   .description("Create and upload a bundle")
   .option("-p, --path <path>", "Path to directory to bundle")
   .action(createBundle);
+
+program.command("logout").description("Logout from LaraCap").action(logout);
 
 program.parse(process.argv);
