@@ -21,7 +21,7 @@ export async function createBundle(options) {
   // 1. Get list of applications
   const spinner = ora("Fetching applications...").start();
   try {
-    const response = await axios.get(`${config.get("apiUrl")}/apps`, {
+    const response = await axios.get(`${config.get("apiUrl")}/applications`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     spinner.succeed("Applications fetched successfully");
@@ -45,37 +45,53 @@ export async function createBundle(options) {
     const output = fs.createWriteStream(outputPath);
     const archive = archiver("zip", { zlib: { level: 9 } });
 
-    output.on("close", async () => {
-      spinner.succeed("Bundle created successfully");
-
-      // 4. Upload the bundle
-      spinner.start("Uploading bundle...");
-      const formData = new FormData();
-      formData.append("bundle", fs.createReadStream(outputPath));
-      formData.append("app_id", appChoice.appId);
-
-      try {
-        await axios.post(`${config.get("apiUrl")}/bundles`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
-        spinner.succeed("Bundle uploaded successfully");
-
-        // Clean up
-        fs.unlinkSync(outputPath);
-      } catch (error) {
-        spinner.fail("Upload failed");
-        console.error(error.response?.data?.message || error.message);
-      }
+    // Create a promise to handle the archive completion
+    const archivePromise = new Promise((resolve, reject) => {
+      output.on("close", resolve);
+      archive.on("error", reject);
     });
 
     archive.pipe(output);
     archive.directory(options.path || ".", false);
     await archive.finalize();
+
+    // Wait for the archive to complete
+    await archivePromise;
+    spinner.succeed("Bundle created successfully");
+
+    // 4. Upload the bundle
+    spinner.start("Uploading bundle...");
+    const formData = new FormData();
+    formData.append("file", fs.createReadStream(outputPath));
+    formData.append("application_id", appChoice.appId);
+
+    try {
+      const uploadResponse = await axios.post(
+        `${config.get("apiUrl")}/bundles`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            ...formData.getHeaders(), // Important: Use FormData headers
+          },
+          maxContentLength: Infinity,
+          maxBodyLength: Infinity,
+        }
+      );
+
+      spinner.succeed("Bundle uploaded successfully");
+      console.log("Upload response:", uploadResponse.data);
+
+      // Clean up
+      fs.unlinkSync(outputPath);
+    } catch (error) {
+      spinner.fail("Upload failed");
+      console.error("Upload error:", error.response?.data || error.message);
+      // Keep the zip file in case of error for debugging
+      console.error("Zip file retained at:", outputPath);
+    }
   } catch (error) {
     spinner.fail("Operation failed");
-    console.error(error.response?.data?.message || error.message);
+    console.error("Operation error:", error.response?.data || error.message);
   }
 }
