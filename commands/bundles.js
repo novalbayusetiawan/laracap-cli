@@ -13,6 +13,15 @@ const __dirname = path.dirname(__filename);
 
 export async function createBundle(options) {
   const token = config.get("token");
+  const apiUrl = config.get("apiUrl");
+
+  if (!apiUrl) {
+    console.error(
+      "Please set the server URL first using: npx laracap config:server-url"
+    );
+    return;
+  }
+
   if (!token) {
     console.error("Please login first using: npx laracap login");
     return;
@@ -21,7 +30,7 @@ export async function createBundle(options) {
   // 1. Get list of applications
   const spinner = ora("Fetching applications...").start();
   try {
-    const response = await axios.get(`${config.get("apiUrl")}/applications`, {
+    const response = await axios.get(`${apiUrl}/api/applications`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     spinner.succeed("Applications fetched successfully");
@@ -67,7 +76,7 @@ export async function createBundle(options) {
 
     try {
       const uploadResponse = await axios.post(
-        `${config.get("apiUrl")}/bundles`,
+        `${apiUrl}/api/bundles`,
         formData,
         {
           headers: {

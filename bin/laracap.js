@@ -3,10 +3,16 @@
 import { program } from "commander";
 import { login } from "../commands/auth.js";
 import { createBundle } from "../commands/bundles.js";
+import { setServerUrl } from "../commands/config.js";
 
 program.version("1.0.0").description("LaraCap CLI tool for deployment");
 
 program.command("login").description("Authenticate with LaraCap").action(login);
+
+program
+  .command("config:server-url")
+  .description("Set the LaraCap server URL")
+  .action(setServerUrl);
 
 program
   .command("apps:bundles:create")

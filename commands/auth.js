@@ -3,6 +3,14 @@ import inquirer from "inquirer";
 import { config } from "../config/config.js";
 
 export async function login() {
+  const apiUrl = config.get("apiUrl");
+  if (!apiUrl) {
+    console.error(
+      "Please set the server URL first using: npx laracap config:server-url"
+    );
+    return;
+  }
+
   const questions = [
     {
       type: "input",
@@ -20,7 +28,7 @@ export async function login() {
   const answers = await inquirer.prompt(questions);
 
   try {
-    const response = await axios.post(`${config.get("apiUrl")}/login`, {
+    const response = await axios.post(`${apiUrl}/api/login`, {
       email: answers.email,
       password: answers.password,
     });
