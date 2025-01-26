@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const { program } = require("commander");
-const { login } = require("../commands/auth");
-const { createBundle } = require("../commands/bundles");
+import { program } from "commander";
+import { login } from "../commands/auth.js";
+import { createBundle } from "../commands/bundles.js";
 
 program.version("1.0.0").description("LaraCap CLI tool for deployment");
 

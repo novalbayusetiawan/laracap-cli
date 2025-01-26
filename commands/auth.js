@@ -1,9 +1,8 @@
-const axios = require("axios");
-const inquirer = require("inquirer");
-const Conf = require("conf");
-const config = new Conf();
+import axios from "axios";
+import inquirer from "inquirer";
+import { config } from "../config/config.js";
 
-async function login() {
+export async function login() {
   const questions = [
     {
       type: "input",
@@ -21,7 +20,7 @@ async function login() {
   const answers = await inquirer.prompt(questions);
 
   try {
-    const response = await axios.post("http://laracap-live-update.test/api/login", {
+    const response = await axios.post(`${config.get("apiUrl")}/login`, {
       email: answers.email,
       password: answers.password,
     });
@@ -35,5 +34,3 @@ async function login() {
     );
   }
 }
-
-module.exports = { login };

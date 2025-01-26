@@ -1,13 +1,17 @@
-const axios = require("axios");
-const inquirer = require("inquirer");
-const archiver = require("archiver");
-const fs = require("fs");
-const path = require("path");
-const ora = require("ora");
-const Conf = require("conf");
-const config = new Conf();
+import axios from "axios";
+import inquirer from "inquirer";
+import archiver from "archiver";
+import fs from "fs";
+import path from "path";
+import ora from "ora";
+import { fileURLToPath } from "url";
+import FormData from "form-data";
+import { config } from "../config/config.js";
 
-async function createBundle(options) {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export async function createBundle(options) {
   const token = config.get("token");
   if (!token) {
     console.error("Please login first using: npx laracap login");
@@ -17,7 +21,7 @@ async function createBundle(options) {
   // 1. Get list of applications
   const spinner = ora("Fetching applications...").start();
   try {
-    const response = await axios.get("YOUR_API_URL/apps", {
+    const response = await axios.get(`${config.get("apiUrl")}/apps`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     spinner.succeed("Applications fetched successfully");
@@ -51,7 +55,7 @@ async function createBundle(options) {
       formData.append("app_id", appChoice.appId);
 
       try {
-        await axios.post("YOUR_API_URL/bundles", formData, {
+        await axios.post(`${config.get("apiUrl")}/bundles`, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
@@ -75,5 +79,3 @@ async function createBundle(options) {
     console.error(error.response?.data?.message || error.message);
   }
 }
-
-module.exports = { createBundle };
