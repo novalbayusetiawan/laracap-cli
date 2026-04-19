@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export async function createBundle(options) {
-  const token = config.get("token");
+  const token = options.token || config.get("token");
   const apiUrl = config.get("apiUrl");
 
   if (!apiUrl) {
@@ -23,36 +23,46 @@ export async function createBundle(options) {
   }
 
   if (!token) {
-    console.error("Please login first using: npx laracap login");
+    console.error("Please login first using: npx laracap login or provide a token using --token");
     return;
   }
 
-  // 1. Get list of applications
-  const spinner = ora("Fetching applications...").start();
-  try {
-    const response = await axios.get(`${apiUrl}/api/applications`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    spinner.succeed("Applications fetched successfully");
+  let appId = options.appId;
 
-    // 2. Let user choose an application
-    const appChoice = await inquirer.prompt([
-      {
-        type: "list",
-        name: "appId",
-        message: "Choose an application:",
-        choices: response.data.map((app) => ({
-          name: app.name,
-          value: app.id,
-        })),
-      },
-    ]);
+  if (!appId) {
+    // 1. Get list of applications
+    const spinner = ora("Fetching applications...").start();
+    try {
+      const response = await axios.get(`${apiUrl}/api/applications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      spinner.succeed("Applications fetched successfully");
 
-    // 3. Create zip file
-    spinner.start("Creating bundle...");
-    const outputPath = path.join(process.cwd(), "bundle.zip");
-    const output = fs.createWriteStream(outputPath);
-    const archive = archiver("zip", { zlib: { level: 9 } });
+      // 2. Let user choose an application
+      const appChoice = await inquirer.prompt([
+        {
+          type: "list",
+          name: "appId",
+          message: "Choose an application:",
+          choices: response.data.map((app) => ({
+            name: app.name,
+            value: app.id,
+          })),
+        },
+      ]);
+      appId = appChoice.appId;
+    } catch (error) {
+      spinner.fail("Failed to fetch applications");
+      console.error(error.response?.data || error.message);
+      return;
+    }
+  }
+
+  // 3. Create zip file
+  const spinner = ora("Creating bundle...").start();
+  const outputPath = path.join(process.cwd(), "bundle.zip");
+  const output = fs.createWriteStream(outputPath);
+  const archive = archiver("zip", { zlib: { level: 9 } });
 
     // Create a promise to handle the archive completion
     const archivePromise = new Promise((resolve, reject) => {
@@ -69,10 +79,10 @@ export async function createBundle(options) {
     spinner.succeed("Bundle created successfully");
 
     // 4. Upload the bundle
-    spinner.start("Uploading bundle...");
+    const uploadSpinner = ora("Uploading bundle...").start();
     const formData = new FormData();
     formData.append("file", fs.createReadStream(outputPath));
-    formData.append("application_id", appChoice.appId);
+    formData.append("application_id", appId);
 
     try {
       const uploadResponse = await axios.post(
@@ -88,19 +98,19 @@ export async function createBundle(options) {
         }
       );
 
-      spinner.succeed("Bundle uploaded successfully");
+      uploadSpinner.succeed("Bundle uploaded successfully");
       console.log("Upload response:", uploadResponse.data);
 
       // Clean up
       fs.unlinkSync(outputPath);
     } catch (error) {
-      spinner.fail("Upload failed");
+      uploadSpinner.fail("Upload failed");
       console.error("Upload error:", error.response?.data || error.message);
       // Keep the zip file in case of error for debugging
       console.error("Zip file retained at:", outputPath);
     }
   } catch (error) {
-    spinner.fail("Operation failed");
-    console.error("Operation error:", error.response?.data || error.message);
+    const errorMsg = error.response?.data || error.message;
+    console.error("Operation error:", errorMsg);
   }
 }
