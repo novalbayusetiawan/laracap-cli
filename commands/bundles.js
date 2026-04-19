@@ -85,6 +85,10 @@ export async function createBundle(options) {
     formData.append("file", fs.createReadStream(outputPath));
     formData.append("application_id", appId);
 
+    if (options.name) {
+      formData.append("name", options.name);
+    }
+
     try {
       const uploadResponse = await axios.post(
         `${apiUrl}/api/bundles`,
