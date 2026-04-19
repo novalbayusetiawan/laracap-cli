@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 
 export async function createBundle(options) {
   const token = options.token || config.get("token");
-  const apiUrl = config.get("apiUrl");
+  const apiUrl = options.server || config.get("apiUrl");
 
   if (!apiUrl) {
     console.error(
