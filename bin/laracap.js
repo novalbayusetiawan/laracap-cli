@@ -19,6 +19,7 @@ program
   .description("Create and upload a bundle")
   .option("-p, --path <path>", "Path to directory to bundle")
   .option("-n, --name <name>", "Bundle release name/version")
+  .option("-c, --channel <channel>", "Channel name (e.g., production, staging)")
   .option("-t, --token <token>", "API Token for authentication (bypass login)")
   .option("-a, --app-id <appId>", "Application ID (required for non-interactive use)")
   .option("-s, --server <url>", "Server URL (e.g. https://laracap.dev)")

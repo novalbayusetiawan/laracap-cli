@@ -88,6 +88,9 @@ export async function createBundle(options) {
     if (options.name) {
       formData.append("name", options.name);
     }
+    if (options.channel) {
+      formData.append("channel", options.channel);
+    }
 
     try {
       const uploadResponse = await axios.post(
