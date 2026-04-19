@@ -59,10 +59,11 @@ export async function createBundle(options) {
   }
 
   // 3. Create zip file
-  const spinner = ora("Creating bundle...").start();
-  const outputPath = path.join(process.cwd(), "bundle.zip");
-  const output = fs.createWriteStream(outputPath);
-  const archive = archiver("zip", { zlib: { level: 9 } });
+  try {
+    const spinner = ora("Creating bundle...").start();
+    const outputPath = path.join(process.cwd(), "bundle.zip");
+    const output = fs.createWriteStream(outputPath);
+    const archive = archiver("zip", { zlib: { level: 9 } });
 
     // Create a promise to handle the archive completion
     const archivePromise = new Promise((resolve, reject) => {
