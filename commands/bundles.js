@@ -92,6 +92,21 @@ export async function createBundle(options) {
       formData.append("channel", options.channel);
     }
 
+    const versionFields = [
+      ["androidMin", "android_min_version_code"],
+      ["androidMax", "android_max_version_code"],
+      ["androidEq", "android_eq_version_code"],
+      ["iosMin", "ios_min_version_code"],
+      ["iosMax", "ios_max_version_code"],
+      ["iosEq", "ios_eq_version_code"],
+    ];
+
+    for (const [optionKey, formKey] of versionFields) {
+      if (options[optionKey]) {
+        formData.append(formKey, options[optionKey]);
+      }
+    }
+
     try {
       const uploadResponse = await axios.post(
         `${apiUrl}/api/bundles`,
